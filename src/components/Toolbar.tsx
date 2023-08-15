@@ -2,8 +2,9 @@ import React, { useEffect } from 'react'
 import { Form, Row, Col } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { setErrors, setRegion, setSeed, setData } from '../redux/reducers/table';
-import { generateUsers } from '../utils';
-import { PER_PAGE } from '../constants';
+import { downloadBlob, generateUsers } from '../utils';
+import { REGIONS_MAP } from '../constants';
+import { Region } from '../types';
 
 const Toolbar = () => {
 	const dispatch = useAppDispatch();
@@ -39,7 +40,15 @@ const Toolbar = () => {
 
 	const handleSeedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		dispatch(setSeed(parseInt(event.target.value)));
-  };
+  	};
+
+	const setRandomSeed = () => {
+		dispatch(setSeed(Math.floor(Math.random()*1000)));
+	}
+
+	const handleCSVExport = () => {
+		downloadBlob(data);
+	}
   
 	return (
 		<Form  className='toolbar position-sticky top-0 p-0 m-0 w-100'>
@@ -48,9 +57,7 @@ const Toolbar = () => {
 				<Form.Group controlId="regionSelector" className='form-group'>
 				<Form.Label>Region</Form.Label>
 				<Form.Control as="select" value={region} onChange={handleRegionChange}>
-					<option value="en_US">USA</option>
-					<option value="ru">Russia</option>
-					<option value="lv">Latvia</option>
+					{Object.keys(REGIONS_MAP).map((key, index) => <option key={index} value={key}>{REGIONS_MAP[key as Region]}</option>)}
 				</Form.Control>
 				</Form.Group>
 			</Col>
@@ -60,7 +67,6 @@ const Toolbar = () => {
 				<Form.Control
 					type="number"
 					onChange={handleErrorsChange}
-					value={errors}
 					placeholder="Enter value"
 				/>
 				</Form.Group>
@@ -77,12 +83,27 @@ const Toolbar = () => {
 			</Col>
 			<Col xs="auto">
 				<Form.Group controlId="textInput" className='form-group'>
-				<Form.Label>Seed</Form.Label>
-				<Form.Control
-					type="number"
-					onChange={handleSeedChange}
-					placeholder="Enter value"
-				/>
+					<Form.Label>Seed</Form.Label>
+					<Form.Control
+						type="number"
+						onChange={handleSeedChange}
+						value={seed}
+						placeholder="Enter value"
+					/>
+					<Form.Control
+						type="button"
+						onClick={() => {setRandomSeed()}}
+						value='Random'
+					/>
+				</Form.Group>
+			</Col>
+			<Col xs="auto">
+				<Form.Group controlId="textInput" className='form-group'>
+					<Form.Control
+						type="button"
+						onClick={() => {handleCSVExport()}}
+						value='Export to CVS'
+					/>
 				</Form.Group>
 			</Col>
 			</Row>

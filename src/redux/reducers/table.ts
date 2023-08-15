@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { User } from '../../types';
+import { Region, User } from '../../types';
 import { generateUsers } from '../../utils';
-import { PER_PAGE } from '../../constants';
+import { PER_PAGE, REGIONS } from '../../constants';
 
 type tableState = {
-	region: 'en_US' | 'ru' | 'lv',
+	region: Region,
 	errors: number,
 	seed: number,
 	data: User[],
@@ -12,10 +12,10 @@ type tableState = {
 }
 
 const initialState: tableState = {
-	region: 'ru',
+	region: REGIONS.en_US,
 	errors: 0,
 	seed: 0,
-	data: generateUsers({ region: 'ru', length: PER_PAGE, seed: 0 }),
+	data: generateUsers({ region: REGIONS.en_US, length: PER_PAGE, seed: 0 }),
 	currentPage: 0,
 }
 

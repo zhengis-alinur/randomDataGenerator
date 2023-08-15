@@ -1,8 +1,8 @@
 import { fakerRU, fakerEN_US, fakerLV } from '@faker-js/faker';
-import { Locale } from '../types';
+import { Region } from '../types';
 
 type FakerProps = {
-	region: Locale,
+	region: Region,
 	seed: number
 }
 

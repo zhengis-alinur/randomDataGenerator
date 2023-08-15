@@ -1,15 +1,15 @@
 import { ALPHABETS } from "../constants";
-import { Locale, User } from "../types";
+import { Region, User } from "../types";
 import lodash from 'lodash';
 
 export const generateErrors = ({ user, errors, region }: {
-	user: User, errors: number, region: Locale
+	user: User, errors: number, region: Region
 }) => {
 	let errorUser = { ...user };
-	const trunc = Math.trunc(errors);
-	const minor = errors - Math.trunc(errors);
+	const floor = Math.floor(errors);
+	const minor = errors - floor;
 	const major = 1 - minor;
-	for (let i = 0; i < trunc; i++) {
+	for (let i = 0; i < floor; i++) {
 		if (Math.random() <= major) {
 			let { key, value } = getRandomUserCredential(errorUser);
 			value = getRandomizer()(value, region);
@@ -52,7 +52,7 @@ export const deleteSymbol = (inputString: string) => {
 	return modifiedString;
 };
 
-export const addSymbol = (inputString: string, region: Locale) => {
+export const addSymbol = (inputString: string, region: Region) => {
 	const alphabet = ALPHABETS[region];
 	let symbol;
 	if (Math.random() > 0.5) {
