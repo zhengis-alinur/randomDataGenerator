@@ -1,15 +1,15 @@
 * {
-  color: #FFF;
-  background-color: #1f2226;
+    color: #fff;
+    background-color: #1f2226;
 }
 
 .form-group {
-  display: flex;
-  align-items: center;
-  padding: 0;
-  gap: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    gap: 20px;
 }
 
 .col-auto {
-  margin: 20px 0 20px
+    margin: 20px 0 20px;
 }

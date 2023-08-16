@@ -1,83 +1,104 @@
 import { ALPHABETS } from "../constants";
 import { Region, User } from "../types";
-import lodash from 'lodash';
+import seedrandom from 'seedrandom';
 
-export const generateErrors = ({ user, errors, region }: {
-	user: User, errors: number, region: Region
+export const generateErrors = ({
+	user,
+	errors,
+	region,
+	seed,
+}: {
+	user: User;
+	errors: number;
+	region: Region;
+	seed: number;
 }) => {
+	const rng = seedrandom(
+		user.name + user.address + user.phone + user.id + errors + seed + region
+	);
+
 	let errorUser = { ...user };
 	const floor = Math.floor(errors);
 	const minor = errors - floor;
 	const major = 1 - minor;
-	for (let i = 0; i < floor; i++) {
-		if (Math.random() <= major) {
-			let { key, value } = getRandomUserCredential(errorUser);
-			value = getRandomizer()(value, region);
-			errorUser = { ...errorUser, [key]: value }
+
+	for (let i = 0; i <= floor; i++) {
+		if (rng() <= major) {
+			errorUser = updateCredential(errorUser, rng, region);
 		}
 	}
-	if (Math.random() < minor) {
-		let { key, value } = getRandomUserCredential(user);
-		value = getRandomizer()(value, region);
-		errorUser = { ...errorUser, [key]: value }
+	if (rng() < minor) {
+		errorUser = updateCredential(errorUser, rng, region);
 	}
+
 	return errorUser;
-}
+};
 
-const getRandomUserCredential = (user: User) => {
+const updateCredential = (user: User, rng: seedrandom.PRNG, region: Region) => {
+	const { key, value } = getRandomUserCredential(user, rng);
+	return { ...user, [key]: getRandomizer(rng)(value, region) };
+};
+
+const getRandomUserCredential = (user: User, rng: seedrandom.PRNG) => {
 	const keys = Object.keys(user);
-	const key = keys[Math.floor(Math.random() * keys.length)] as keyof User;
-	return { key, value: user[key] }
-}
+	const key = keys[Math.floor(rng() * keys.length)] as keyof User;
+	return { key, value: user[key] };
+};
 
-const getRandomizer = () => {
+const getRandomizer = (rng: seedrandom.PRNG) => {
 	const probability = 1 / 3;
-	const randomValue = Math.random();
-	if (randomValue < probability) {
-		return deleteSymbol;
-	} else if (randomValue < 2 * probability) {
-		return addSymbol;
-	} else {
-		return shuffleSymbols;
-	}
-}
+	const randomValue = rng();
 
-export const deleteSymbol = (inputString: string) => {
+	if (randomValue < probability) {
+		return deleteSymbol(rng);
+	} else if (randomValue < 2 * probability) {
+		return addSymbol(rng);
+	} else {
+		return shuffleSymbols(rng);
+	}
+};
+
+export const deleteSymbol = (rng: seedrandom.PRNG) => (inputString: string) => {
 	if (inputString.length === 0) {
 		return inputString;
 	}
 
-	const randomIndex = lodash.random(0, inputString.length - 1);
+	const randomIndex = Math.floor(rng() * inputString.length - 1);
 	const modifiedString = inputString.slice(0, randomIndex) + inputString.slice(randomIndex + 1);
 	return modifiedString;
 };
 
-export const addSymbol = (inputString: string, region: Region) => {
+export const addSymbol = (rng: seedrandom.PRNG) => (inputString: string, region: Region) => {
 	const alphabet = ALPHABETS[region];
 	let symbol;
-	if (Math.random() > 0.5) {
-		const randomSymbol = alphabet[Math.floor(Math.random() * alphabet.length)];
-		symbol = Math.random() > 0.5 ? randomSymbol : randomSymbol.toUpperCase();
+
+	if (rng() > 0.5) {
+		const randomSymbol = alphabet[Math.floor(rng() * alphabet.length)];
+		symbol = rng() > 0.5 ? randomSymbol : randomSymbol.toUpperCase();
 	} else {
-		symbol = Math.floor(Math.random() * 100);
+		symbol = Math.floor(rng() * 100);
 	}
-	const randomIndex = lodash.random(0, inputString.length);
+
+	const randomIndex = Math.floor(rng() * inputString.length - 1);
 	const modifiedString = inputString.slice(0, randomIndex) + symbol + inputString.slice(randomIndex);
 	return modifiedString;
 };
 
-export const shuffleSymbols = (inputString: string) => {
+export const shuffleSymbols = (rng: seedrandom.PRNG) => (inputString: string) => {
 	if (inputString.length < 2) {
 		return inputString;
 	}
-	const index1 = Math.floor(Math.random() * inputString.length);
-	let index2 = Math.floor(Math.random() * inputString.length);
+
+	const index1 = Math.floor(rng() * inputString.length);
+	let index2 = Math.floor(rng() * inputString.length);
+
 	while (index2 === index1) {
-		index2 = Math.floor(Math.random() * inputString.length);
+		index2 = Math.floor(rng() * inputString.length);
 	}
+
 	const letters = inputString.split('');
 	const temp = letters[index1];
 	letters[index1] = letters[index2];
 	letters[index2] = temp;
 	return letters.join('');
-}
+};
