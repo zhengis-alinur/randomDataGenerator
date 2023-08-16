@@ -6,7 +6,6 @@ import {
     setRegion,
     setSeed,
     setData,
-    updateData,
 } from '../redux/reducers/table';
 import { downloadBlob, generateUsers } from '../utils';
 import { REGIONS_MAP } from '../constants';
@@ -48,10 +47,11 @@ const Toolbar = () => {
         dispatch(isNaN(value) ? setErrors(0) : setErrors(value));
 
         dispatch(
-            updateData(
+            setData(
                 generateUsers({
                     region,
                     seed: seed + currentPage,
+                    length: data.length,
                     errors: value,
                 })
             )
@@ -63,10 +63,11 @@ const Toolbar = () => {
         isNaN(value) ? dispatch(setSeed(0)) : dispatch(setSeed(value));
 
         dispatch(
-            updateData(
+            setData(
                 generateUsers({
                     region,
                     seed: value + currentPage,
+                    length: data.length,
                     errors,
                 })
             )
@@ -78,10 +79,11 @@ const Toolbar = () => {
         dispatch(setSeed(value));
 
         dispatch(
-            updateData(
+            setData(
                 generateUsers({
                     region,
                     seed: value + currentPage,
+                    length: data.length,
                     errors,
                 })
             )
