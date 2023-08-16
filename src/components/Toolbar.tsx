@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import {
@@ -6,6 +6,7 @@ import {
     setRegion,
     setSeed,
     setData,
+    updateData,
 } from '../redux/reducers/table';
 import { downloadBlob, generateUsers } from '../utils';
 import { REGIONS_MAP } from '../constants';
@@ -26,47 +27,65 @@ const Toolbar = () => {
     const data = useAppSelector(selectData);
     const currentPage = useAppSelector(selectCurrentPage);
 
-    useEffect(() => {
-        const lastPage = generateUsers({
-            region,
-            seed: seed + currentPage,
-            errors,
-        });
-        dispatch(setData([...data.slice(0, -10), ...lastPage]));
-    }, [seed]);
-
-    useEffect(() => {
-        const newRegionData = generateUsers({
-            region,
-            seed,
-            length: data.length,
-            errors,
-        });
-        dispatch(setData(newRegionData));
-    }, [region]);
-
     const handleRegionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegion(event.target.value));
+        const value = event.target.value as Region;
+        dispatch(setRegion(value));
+        dispatch(
+            setData(
+                generateUsers({
+                    region: value,
+                    seed,
+                    length: data.length,
+                    errors,
+                })
+            )
+        );
     };
 
     const handleErrorsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const errorCount = parseFloat(event.target.value);
-        if (errorCount > 1000) return;
-        const lastPage = generateUsers({
-            region,
-            seed: seed + currentPage,
-            errors: errorCount,
-        });
-        dispatch(setData([...data.slice(0, -10), ...lastPage]));
-        dispatch(setErrors(errorCount));
+        const value = parseFloat(event.target.value);
+        if (value > 1000) return;
+        dispatch(isNaN(value) ? setErrors(0) : setErrors(value));
+
+        dispatch(
+            updateData(
+                generateUsers({
+                    region,
+                    seed: seed + currentPage,
+                    errors: value,
+                })
+            )
+        );
     };
 
     const handleSeedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setSeed(parseInt(event.target.value)));
+        const value = parseInt(event.target.value);
+        isNaN(value) ? dispatch(setSeed(0)) : dispatch(setSeed(value));
+
+        dispatch(
+            updateData(
+                generateUsers({
+                    region,
+                    seed: value + currentPage,
+                    errors,
+                })
+            )
+        );
     };
 
-    const setRandomSeed = () => {
-        dispatch(setSeed(Math.floor(Math.random() * 1000)));
+    const handleRandomSeedClick = () => {
+        const value = Math.floor(Math.random() * 1000);
+        dispatch(setSeed(value));
+
+        dispatch(
+            updateData(
+                generateUsers({
+                    region,
+                    seed: value + currentPage,
+                    errors,
+                })
+            )
+        );
     };
 
     const handleCSVExport = () => {
@@ -99,8 +118,9 @@ const Toolbar = () => {
                     <Form.Group controlId="textInput" className="form-group">
                         <Form.Label>Errors</Form.Label>
                         <Form.Control
-                            type="number"
+                            type="text"
                             onChange={handleErrorsChange}
+                            value={errors}
                             placeholder="Enter value"
                         />
                     </Form.Group>
@@ -119,16 +139,14 @@ const Toolbar = () => {
                     <Form.Group controlId="textInput" className="form-group">
                         <Form.Label>Seed</Form.Label>
                         <Form.Control
-                            type="number"
+                            type="text"
                             onChange={handleSeedChange}
-                            value={seed === 0 ? 0 : seed}
+                            value={seed}
                             placeholder="Enter value"
                         />
                         <Form.Control
                             type="button"
-                            onClick={() => {
-                                setRandomSeed();
-                            }}
+                            onClick={handleRandomSeedClick}
                             value="Random"
                         />
                     </Form.Group>

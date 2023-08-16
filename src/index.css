@@ -13,3 +13,7 @@
 .col-auto {
     margin: 20px 0 20px;
 }
+
+th {
+    max-width: 100px;
+}

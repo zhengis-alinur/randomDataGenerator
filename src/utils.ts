@@ -1,6 +1,6 @@
 import { Faker, allFakers } from "@faker-js/faker";
 import { Region, User } from "./types";
-import { generateErrors } from "./faker/errors";
+import ErrorGenerator from "./faker/errors";
 import { PER_PAGE } from "./constants";
 
 export const generateRandomUser = ({
@@ -25,7 +25,7 @@ export const generateRandomUser = ({
 		return user;
 	}
 
-	return generateErrors({ user, errors, region, seed });
+	return new ErrorGenerator({ user, errors, region, seed }).generateErrors();
 };
 
 export const generateUsers = ({
